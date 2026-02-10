@@ -1,0 +1,13 @@
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 12
+names: ['50 50 biscuit', 'biscuit', 'deodorant', 'detergent', 'eucalyptus oil', 'lays', 'maggi', 'oil', 'oreo biscuit', 'powder', 'soap', 'tooth paste']
+
+roboflow:
+  workspace: trash-cip6b
+  project: smart-trolley
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/trash-cip6b/smart-trolley/dataset/2

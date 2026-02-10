@@ -1,0 +1,97 @@
+services:
+  # PostgreSQL for inventory management
+  postgres:
+    image: postgres:15-alpine
+    container_name: ssis_prod_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ssis_inventory
+      POSTGRES_USER: ssis_user
+      POSTGRES_PASSWORD: ssis_password_2024
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./database/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ssis_prod_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ssis_user" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB for event logging
+  mongodb:
+    image: mongo:7
+    container_name: ssis_prod_mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ssis_admin
+      MONGO_INITDB_ROOT_PASSWORD: ssis_mongo_2024
+      MONGO_INITDB_DATABASE: ssis_events
+    volumes:
+      - mongodb_prod_data:/data/db
+      - ./database/init_mongo.js:/docker-entrypoint-initdb.d/init.js
+    networks:
+      - ssis_prod_network
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: ssis_prod_redis
+    restart: always
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - ssis_prod_network
+    command: redis-server --appendonly yes
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: ssis_prod_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://ssis_user:ssis_password_2024@postgres:5432/ssis_inventory
+      - MONGODB_URL=mongodb://ssis_admin:ssis_mongo_2024@mongodb:27017/ssis_events?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - VIDEO_SOURCE=synthetic
+    volumes:
+      - video_prod_data:/app/videos
+      - model_prod_cache:/app/models
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - ssis_prod_network
+  # Frontend Dashboard (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: ssis_prod_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ssis_prod_network
+
+volumes:
+  postgres_prod_data:
+  mongodb_prod_data:
+  redis_prod_data:
+  video_prod_data:
+  model_prod_cache:
+
+
+networks:
+  ssis_prod_network:
+    driver: bridge

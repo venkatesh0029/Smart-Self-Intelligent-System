@@ -1,0 +1,109 @@
+services:
+  # PostgreSQL for inventory management
+  postgres:
+    image: postgres:15-alpine
+    container_name: ssis_postgres
+    environment:
+      POSTGRES_DB: ssis_inventory
+      POSTGRES_USER: ssis_user
+      POSTGRES_PASSWORD: ssis_password_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ssis_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ssis_user -d ssis_inventory" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB for event logging
+  mongodb:
+    image: mongo:7
+    container_name: ssis_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ssis_admin
+      MONGO_INITDB_ROOT_PASSWORD: ssis_mongo_2024
+      MONGO_INITDB_DATABASE: ssis_events
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+      - ./database/init_mongo.js:/docker-entrypoint-initdb.d/init.js
+    networks:
+      - ssis_network
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: ssis_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ssis_network
+    command: redis-server --appendonly yes
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ssis_backend
+    environment:
+      - DATABASE_URL=postgresql://ssis_user:ssis_password_2024@postgres:5432/ssis_inventory
+      - MONGODB_URL=mongodb://ssis_admin:ssis_mongo_2024@mongodb:27017/ssis_events?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - VIDEO_SOURCE=synthetic # Use synthetic video for demo in Docker
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - video_data:/app/videos
+      - model_cache:/app/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - ssis_network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend Dashboard
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ssis_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - ssis_network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  mongodb_dev_data:
+  redis_data:
+  video_data:
+  model_cache:
+
+
+networks:
+  ssis_network:
+    driver: bridge
