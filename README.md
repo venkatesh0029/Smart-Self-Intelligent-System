@@ -1,9 +1,10 @@
 # Smart-Self-Intelligent-System
 An enterprise-grade AI-powered retail intelligence platform that uses Computer Vision (YOLOv8) with real-time video streams to monitor shelves, detect anomalies, analyze customer interactions, and automate restocking alerts. The system is built with a scalable microservices architecture using Docker, modern web tech, and ML analytics.
 
-##🎯 Goal: Reduce manual shelf checks, prevent stockouts/theft, and provide actionable insights to retail managers in real time.
+# 🎯 Goal
+Reduce manual shelf checks, prevent stockouts/theft, and provide actionable insights to retail managers in real time.
 
-##✨ Key Features
+# ✨ Key Features
 ```
 🧠 Real-Time Computer Vision
 
@@ -77,7 +78,7 @@ Dockerized services
 | ML Pipeline | Custom YOLO training       |
 ```
 
-## 📁 Project Structure
+#  📁 Project Structure
 ```
 Smart-Self-Intelligent-System/
 │
@@ -114,7 +115,7 @@ Smart-Self-Intelligent-System/
 ├── .env.example                # Environment variables template
 └── README.md                   # Project documentation
 ```
-## ⚙️ Installation & Setup
+# ⚙️ Installation & Setup
 ```
 ✅ Prerequisites
 
@@ -126,7 +127,7 @@ Node.js (for frontend)
 
 NVIDIA GPU (optional, recommended for YOLO performance)
 ```
-##🚀 Quick Start (Docker – Recommended)
+# 🚀 Quick Start (Docker – Recommended)
 ```
 git clone https://github.com/venkatesh0029/Smart-Self-Intelligent-System.git
 cd Smart-Self-Intelligent-System
@@ -138,11 +139,11 @@ Frontend:
 Backend API:
 👉 http://localhost:8000/docs
 
-## 🧪 Verify System Health
+# 🧪 Verify System Health
 ```
 python verify_system.py
 ```
-##🎯 Training Custom YOLO Model
+# 🎯 Training Custom YOLO Model
 ```
 pip install ultralytics
 yolo detect train model=yolov8n.pt data=dataset.yaml epochs=50
@@ -155,7 +156,7 @@ Empty shelves
 
 Misplaced items
 
-## 📊 Example Use Cases
+# 📊 Example Use Cases
 ```
 📉 Detect out-of-stock shelves
 
@@ -167,7 +168,7 @@ Misplaced items
 
 🧍 Analyze customer-product interactions
 ```
-## 🔮 Roadmap
+# 🔮 Roadmap
  Mobile App (React Native)
 
  Advanced customer heatmaps
@@ -177,7 +178,7 @@ Misplaced items
  Cloud deployment (AWS/GCP)
 
  Role-based dashboard access
- ## 🛡 Security & Privacy
+ # 🛡 Security & Privacy
 Camera streams processed locally (no cloud upload by default)
 
 Sensitive configs stored in .env
