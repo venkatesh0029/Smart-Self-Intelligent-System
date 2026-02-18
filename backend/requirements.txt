@@ -13,11 +13,11 @@ redis==5.0.1
 
 # AI and Computer Vision
 ultralytics==8.0.221  # YOLOv8
-opencv-python==4.8.1.78
-opencv-contrib-python==4.8.1.78
+opencv-python>=4.9.0.80
+opencv-contrib-python>=4.9.0.80
 torch
 torchvision
-numpy==1.24.3
+numpy>=1.26.0
 pillow==10.1.0
 
 # Object Tracking
@@ -57,3 +57,4 @@ pytest-cov==4.1.0
 black==23.11.0
 flake8==6.1.0
 mypy==1.7.1
+requests

@@ -27,3 +27,5 @@ redis_data/
 # Project Specific
 video_data/
 model_cache/
+runs/
+*.cache
