@@ -1,5 +1,18 @@
 from ultralytics import YOLO
 import os
+import torch
+
+# --- PYTORCH 2.6 FIX ---
+# Monkey-patch torch.load to disable weights_only=True default
+_original_load = torch.load
+
+def strict_load_bypass(*args, **kwargs):
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return _original_load(*args, **kwargs)
+
+torch.load = strict_load_bypass
+# -----------------------
 
 def train():
     # Load a model
